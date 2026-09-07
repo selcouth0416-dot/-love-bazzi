@@ -116,45 +116,6 @@
       width: 0%;
       background: linear-gradient(90deg, #00e5ff, #ff3388);
     }
-
-    .ghost-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      font-size: 11px;
-      color: #555555;
-    }
-
-    .ghost-btn {
-      background: none;
-      border: none;
-      color: inherit;
-      font-family: inherit;
-      font-size: 11px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: color 0.15s;
-    }
-
-    .ghost-btn:hover {
-      color: #ff3388;
-    }
-
-    /* Drag & Drop Feedback */
-    .drop-hint {
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      border: 2px dashed #ff3388;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      color: #ff3388;
-      font-size: 14px;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
@@ -166,53 +127,33 @@
     <div class="play-overlay" id="play-overlay">
       <div class="play-circle">▶</div>
     </div>
-
-    <div class="drop-hint" id="drop-hint">
-      Lepaskan file MP3 atau Video di sini
-    </div>
   </div>
 
-  <!-- Timeline Minimalis Tanpa Kotak -->
+  <!-- Timeline Minimalis -->
   <div class="bottom-bar">
     <div class="timeline-track" id="timeline">
       <div class="timeline-line">
         <div class="timeline-fill" id="timeline-fill"></div>
       </div>
     </div>
-
-    <div class="ghost-actions">
-      <!-- Input File Tersembunyi (Bisa upload langsung atau drag & drop) -->
-      <label class="ghost-btn" title="Pilih Lagu MP3">
-        🎵 <span id="lbl-audio">Pilih MP3</span>
-        <input type="file" id="input-audio" accept="audio/*" style="display: none;" />
-      </label>
-
-      <label class="ghost-btn" title="Ganti Video Tengah">
-        🎬 <span id="lbl-video">Ganti Video</span>
-        <input type="file" id="input-video" accept="video/*" style="display: none;" />
-      </label>
-
-      <span style="color: #ff3388;">♥</span>
-    </div>
   </div>
 
-  <!-- Elemen Audio & Video Native (Direct Hardware Output) -->
+  <!-- Elemen Audio & Video Native -->
   <audio id="audio-player" preload="auto"></audio>
   <video id="video-player" preload="auto" playsinline muted loop style="display: none;"></video>
 
   <script>
     // =========================================================================
     // ⚙️ PENGATURAN LEWAT KODE
-    // Masukkan file 'bazzi.mp3' & 'video.mp4' di folder yang sama di GitHub
+    // Letakkan 'bazzi.mp3' & 'video_tengah.mov' di folder yang sama
     // =========================================================================
     const DEFAULT_AUDIO = 'bazzi.mp3';
-    const DEFAULT_VIDEO = 'video.mp4';
+    const DEFAULT_VIDEO = 'video_tengah.mov';
     // =========================================================================
 
     // Sinkronisasi Lirik Bazzi - Beautiful
     const LYRICS = [
-      { start: 0.0, end: 2.8, text: 'BEAUTIFUL' },
-      { start: 2.8, end: 4.8, text: '...got you faded...' },
+      { start: 0.0, end: 4.8, text: '...got you faded...' },
       { start: 4.8, end: 7.2, text: "Sayin' you don't" },
       { start: 7.2, end: 9.8, text: "want from me I need to flex it" },
       { start: 9.8, end: 13.5, text: "Started when we were younger" },
@@ -224,7 +165,7 @@
       { start: 25.2, end: 27.5, text: "Beautiful, beautiful life right now" },
       { start: 27.5, end: 29.8, text: "Beautiful, beautiful night right now" },
       { start: 29.8, end: 31.8, text: "No, no, no... HEY!" },
-      // 00:31.8 CHORUS DROP - VIDEO DI TENGAH + EFEK LOVE
+      // 00:31.8 CHORUS DROP
       { start: 31.8, end: 33.2, text: "Beautiful," },
       { start: 33.2, end: 34.5, text: "Beautiful," },
       { start: 34.5, end: 35.8, text: "Beautiful," },
@@ -281,22 +222,26 @@
     const videoEl = document.getElementById('video-player');
     const playOverlay = document.getElementById('play-overlay');
     const timelineFill = document.getElementById('timeline-fill');
-    const dropHint = document.getElementById('drop-hint');
 
     let isPlaying = false;
     let playhead = 0;
     let startTime = 0;
     let duration = 50.0;
-    let hasCustomAudio = false;
-    let hasCustomVideo = false;
+    let hasAudioLoaded = false;
+    let hasVideoLoaded = false;
 
     // Direct Native Audio Setup
     audioEl.volume = 1.0;
     audioEl.muted = false;
     audioEl.src = DEFAULT_AUDIO;
-    audioEl.oncanplay = () => { hasCustomAudio = true; };
+    audioEl.onloadedmetadata = () => {
+      duration = audioEl.duration || 50.0;
+      hasAudioLoaded = true;
+    };
+    audioEl.oncanplay = () => { hasAudioLoaded = true; };
+
     videoEl.src = DEFAULT_VIDEO;
-    videoEl.oncanplay = () => { hasCustomVideo = true; };
+    videoEl.oncanplay = () => { hasVideoLoaded = true; };
 
     // Offscreen Canvas untuk Rasterisasi Video ke CRT Scanlines
     const videoOffscreen = document.createElement('canvas');
@@ -304,34 +249,12 @@
     videoOffscreen.height = 100;
     const vCtx = videoOffscreen.getContext('2d', { willReadFrequently: true });
 
-    // Audio Loader (Direct Blob, 100% Suara Berbunyi)
-    function loadAudioFile(file) {
-      const url = URL.createObjectURL(file);
-      audioEl.src = url;
-      audioEl.volume = 1.0;
-      audioEl.muted = false;
-      audioEl.load();
-      hasCustomAudio = true;
-      document.getElementById('lbl-audio').innerText = file.name.slice(0, 12) + '...';
-      seek(0);
-      playAudio();
-    }
-
-    function loadVideoFile(file) {
-      const url = URL.createObjectURL(file);
-      videoEl.src = url;
-      videoEl.load();
-      hasCustomVideo = true;
-      document.getElementById('lbl-video').innerText = file.name.slice(0, 12) + '...';
-      if (isPlaying) videoEl.play().catch(() => {});
-    }
-
     function playAudio() {
       isPlaying = true;
       playOverlay.style.opacity = '0';
       startTime = performance.now() - playhead * 1000;
 
-      if (hasCustomAudio) {
+      if (hasAudioLoaded) {
         audioEl.currentTime = playhead;
         audioEl.volume = 1.0;
         audioEl.muted = false;
@@ -340,7 +263,7 @@
         });
       }
 
-      if (hasCustomVideo) {
+      if (hasVideoLoaded) {
         const videoT = Math.max(0, playhead - 31.8);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
         videoEl.play().catch(() => {});
@@ -362,8 +285,8 @@
     function seek(sec) {
       playhead = Math.max(0, Math.min(duration, sec));
       startTime = performance.now() - playhead * 1000;
-      if (hasCustomAudio) audioEl.currentTime = playhead;
-      if (hasCustomVideo) {
+      if (hasAudioLoaded) audioEl.currentTime = playhead;
+      if (hasVideoLoaded) {
         const videoT = Math.max(0, playhead - 31.8);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
       }
@@ -377,40 +300,12 @@
       seek(pos * duration);
     });
 
-    document.getElementById('input-audio').addEventListener('change', (e) => {
-      if (e.target.files[0]) loadAudioFile(e.target.files[0]);
-    });
-
-    document.getElementById('input-video').addEventListener('change', (e) => {
-      if (e.target.files[0]) loadVideoFile(e.target.files[0]);
-    });
-
-    // Drag & Drop File Langsung ke Layar
-    window.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropHint.style.display = 'flex';
-    });
-
-    window.addEventListener('dragleave', (e) => {
-      if (e.clientX <= 0 || e.clientY <= 0) dropHint.style.display = 'none';
-    });
-
-    window.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropHint.style.display = 'none';
-      const files = Array.from(e.dataTransfer.files);
-      for (const f of files) {
-        if (f.type.startsWith('audio/') || f.name.endsWith('.mp3')) loadAudioFile(f);
-        else if (f.type.startsWith('video/') || f.name.endsWith('.mp4')) loadVideoFile(f);
-      }
-    });
-
-    // Render Loop (Hanya Lirik, Love, dan Video)
+    // Render Loop
     function render() {
       requestAnimationFrame(render);
 
       if (isPlaying) {
-        if (hasCustomAudio && !audioEl.paused) {
+        if (hasAudioLoaded && !audioEl.paused) {
           playhead = audioEl.currentTime;
           if (audioEl.duration) duration = audioEl.duration;
           if (audioEl.ended) pauseAudio();
@@ -430,11 +325,10 @@
       const w = canvas.width;
       const h = canvas.height;
 
-      // 1. OLED Black (Latar Hitam Murni Tanpa Kotak)
+      // 1. OLED Black
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, w, h);
 
-      // Cek Chorus Drop (Detik 00:31.8)
       const isDropActive = playhead >= 31.8;
 
       // 2. VIDEO DI TENGAH LAYAR (Aktif Saat Drop 00:31.8)
@@ -444,15 +338,13 @@
 
         let rendered = false;
 
-        // Jika user memasukkan video
-        if (hasCustomVideo && videoEl.readyState >= 2) {
+        if (hasVideoLoaded && videoEl.readyState >= 2) {
           try {
             vCtx.drawImage(videoEl, 0, 0, 160, 100);
             rendered = true;
           } catch(e) {}
         }
 
-        // Generator video dinamis jika belum upload video
         if (!rendered) {
           const t = playhead;
           const headBob = Math.sin(t * 2.2) * 2;
@@ -480,7 +372,6 @@
           vCtx.ellipse(0, 0, 30, 38, 0, 0, Math.PI * 2);
           vCtx.fill();
 
-          // Rosy cheeks
           vCtx.fillStyle = 'rgba(255, 120, 180, 0.5)';
           vCtx.beginPath(); vCtx.ellipse(-14, 4, 8, 5, 0, 0, Math.PI * 2); vCtx.fill();
           vCtx.beginPath(); vCtx.ellipse(14, 4, 8, 5, 0, 0, Math.PI * 2); vCtx.fill();
@@ -492,7 +383,6 @@
           vCtx.restore();
         }
 
-        // Sampling pixel video menjadi dot-matrix scanlines
         const imgData = vCtx.getImageData(0, 0, 160, 100).data;
         const gridCols = 88;
         const gridRows = 48;
@@ -588,22 +478,10 @@
         ctx.restore();
       }
 
-      // 4. LIRIK LAGU PIXEL (HANYA LIRIK & LOVE & VIDEO)
+      // 4. LIRIK LAGU PIXEL (Langsung Masuk Lirik)
       const activeLine = LYRICS.find(l => playhead >= l.start && playhead < l.end);
 
-      if (playhead < 2.8) {
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 46px "Silkscreen", monospace';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText('BEAUTIFUL', w / 2, h * 0.40);
-
-        ctx.font = '22px "Silkscreen", monospace';
-        ctx.fillStyle = '#888888';
-        ctx.fillText('BAZZI', w / 2, h * 0.50);
-        ctx.restore();
-      } else if (activeLine) {
+      if (activeLine) {
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -611,7 +489,6 @@
 
         const textY = isDropActive ? h * 0.53 : h * 0.42;
 
-        // Shadow hitam tebal di belakang huruf agar terbaca sangat tajam
         ctx.fillStyle = '#000000';
         for (let dx = -4; dx <= 4; dx += 2) {
           for (let dy = -4; dy <= 4; dy += 2) {
