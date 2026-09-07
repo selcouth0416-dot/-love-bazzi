@@ -6,6 +6,7 @@
   <title>Bazzi - Beautiful</title>
   <meta name="description" content="Retro Pixel Lyric Video with Floating Hearts" />
 
+  <!-- Google Fonts: Silkscreen Pixel Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
@@ -137,13 +138,12 @@
 
   <script>
     // =========================================================================
-    // ⚙️ PENGATURAN FILE MEDIA
+    // ⚙️ NAMA FILE MEDIA
     // =========================================================================
     const DEFAULT_AUDIO = 'bazzi.mp3';
     const DEFAULT_VIDEO = 'video_tengah.mp4';
     // =========================================================================
 
-    // Lirik & Timing disesuaikan persis dari tampilan video TikTok
     const LYRICS = [
       { start: 1.8, end: 4.8, text: "...got you faded..." },
       { start: 4.8, end: 10.2, text: "saying you're the one for me,\nI need to face it" },
@@ -156,7 +156,7 @@
       { start: 25.0, end: 27.2, text: "beautiful, beautiful\nnight right now" },
       { start: 27.2, end: 30.5, text: "no, no, no" },
       { start: 30.5, end: 32.2, text: "hey.." },
-      // 00:32.2 CHORUS DROP
+      // 00:32.2 DROP
       { start: 32.2, end: 37.0, text: "beautiful, beautiful,\nbeautiful, beautiful angel" },
       { start: 37.0, end: 41.2, text: "love your imperfections\nevery angle" },
       { start: 41.2, end: 46.0, text: "tomorrow comes and goes\nbefore you know" },
@@ -210,8 +210,8 @@
     let startTime = 0;
     let duration = 49.0;
     let hasAudioLoaded = false;
-    let hasVideoLoaded = false;
 
+    // Load media
     audioEl.volume = 1.0;
     audioEl.muted = false;
     audioEl.src = DEFAULT_AUDIO;
@@ -221,10 +221,9 @@
     };
     audioEl.oncanplay = () => { hasAudioLoaded = true; };
 
-    videoEl.crossOrigin = 'anonymous';
+    // Video load langsung tanpa atribut crossOrigin
     videoEl.src = DEFAULT_VIDEO;
-    videoEl.onloadeddata = () => { hasVideoLoaded = true; };
-    videoEl.oncanplay = () => { hasVideoLoaded = true; };
+    videoEl.load();
 
     const videoOffscreen = document.createElement('canvas');
     videoOffscreen.width = 160;
@@ -243,7 +242,7 @@
         audioEl.play().catch(() => {});
       }
 
-      if (hasVideoLoaded) {
+      if (videoEl.readyState >= 1) {
         const videoT = Math.max(0, playhead - 32.2);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
         videoEl.play().catch(() => {});
@@ -266,7 +265,7 @@
       playhead = Math.max(0, Math.min(duration, sec));
       startTime = performance.now() - playhead * 1000;
       if (hasAudioLoaded) audioEl.currentTime = playhead;
-      if (hasVideoLoaded) {
+      if (videoEl.readyState >= 1) {
         const videoT = Math.max(0, playhead - 32.2);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
       }
@@ -317,6 +316,11 @@
             pauseAudio();
           }
         }
+
+        // Sinkronkan video saat drop
+        if (playhead >= 32.2 && videoEl.paused && videoEl.readyState >= 1) {
+          videoEl.play().catch(() => {});
+        }
       }
 
       const p = (playhead / duration) * 100;
@@ -330,61 +334,13 @@
 
       const isDropActive = playhead >= 32.2;
 
-      // Video Dot Matrix
-      if (isDropActive) {
+      // Rasterisasi Video Asli ke Dot Matrix
+      if (isDropActive && videoEl.readyState >= 1) {
         vCtx.fillStyle = '#000000';
         vCtx.fillRect(0, 0, 160, 100);
 
-        let rendered = false;
-
-        if (hasVideoLoaded && videoEl.readyState >= 2) {
-          try {
-            vCtx.drawImage(videoEl, 0, 0, 160, 100);
-            rendered = true;
-          } catch(e) {
-            rendered = false;
-          }
-        }
-
-        if (!rendered) {
-          const t = playhead;
-          const headBob = Math.sin(t * 2.2) * 2;
-          const headTilt = Math.sin(t * 1.4) * 0.08;
-          const blink = Math.sin(t * 1.8) > 0.94 ? 0.2 : 1.0;
-          const hairSway = Math.sin(t * 2.8) * 4;
-
-          vCtx.save();
-          vCtx.translate(80, 50 + headBob);
-          vCtx.rotate(headTilt);
-
-          vCtx.fillStyle = '#0a0a0a';
-          vCtx.beginPath();
-          vCtx.ellipse(0, 2, 54 + hairSway * 0.5, 46, 0, 0, Math.PI * 2);
-          vCtx.fill();
-
-          const fGrad = vCtx.createRadialGradient(0, -2, 6, 0, -2, 38);
-          fGrad.addColorStop(0, '#ffffff');
-          fGrad.addColorStop(0.45, '#c0c0c0');
-          fGrad.addColorStop(0.75, '#666666');
-          fGrad.addColorStop(0.95, '#181818');
-          fGrad.addColorStop(1, '#000000');
-          vCtx.fillStyle = fGrad;
-          vCtx.beginPath();
-          vCtx.ellipse(0, 0, 30, 38, 0, 0, Math.PI * 2);
-          vCtx.fill();
-
-          vCtx.fillStyle = 'rgba(255, 120, 180, 0.5)';
-          vCtx.beginPath(); vCtx.ellipse(-14, 4, 8, 5, 0, 0, Math.PI * 2); vCtx.fill();
-          vCtx.beginPath(); vCtx.ellipse(14, 4, 8, 5, 0, 0, Math.PI * 2); vCtx.fill();
-
-          vCtx.fillStyle = '#101010';
-          vCtx.beginPath(); vCtx.ellipse(-13, -6, 7, 4 * blink, 0, 0, Math.PI * 2); vCtx.fill();
-          vCtx.beginPath(); vCtx.ellipse(13, -6, 7, 4 * blink, 0, 0, Math.PI * 2); vCtx.fill();
-
-          vCtx.restore();
-        }
-
         try {
+          vCtx.drawImage(videoEl, 0, 0, 160, 100);
           const imgData = vCtx.getImageData(0, 0, 160, 100).data;
           const gridCols = 88;
           const gridRows = 48;
@@ -416,7 +372,7 @@
             }
           }
           ctx.globalAlpha = 1.0;
-        } catch (corsErr) {}
+        } catch (err) {}
       }
 
       // Hati Melayang
@@ -460,7 +416,7 @@
         ctx.restore();
       }
 
-      // Hati Berdenyut Drop
+      // Hati Denyut Drop
       if (isDropActive && playhead >= 32.2 && playhead < 37.0) {
         const pulse = 1.0 + Math.sin(playhead * 6.5) * 0.18;
         const pSize = 4.5 * pulse;
@@ -481,7 +437,7 @@
         ctx.restore();
       }
 
-      // Lirik Tengah Layar
+      // Lirik Tengah
       const activeLine = LYRICS.find(l => playhead >= l.start && playhead < l.end);
 
       if (activeLine) {
