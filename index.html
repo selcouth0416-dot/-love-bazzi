@@ -6,7 +6,6 @@
   <title>Bazzi - Beautiful</title>
   <meta name="description" content="Retro Pixel Lyric Video with Floating Hearts" />
 
-  <!-- Google Fonts: Silkscreen Pixel Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
@@ -32,7 +31,6 @@
       justify-content: center;
     }
 
-    /* Landscape Lebar */
     .viewport-container {
       width: 96vw;
       max-width: 1120px;
@@ -52,7 +50,6 @@
       object-fit: contain;
     }
 
-    /* Overlay Tombol Play Saat Terhenti */
     .play-overlay {
       position: absolute;
       inset: 0;
@@ -78,7 +75,6 @@
       padding-left: 4px;
     }
 
-    /* Timeline Ramping */
     .bottom-bar {
       width: 92vw;
       max-width: 780px;
@@ -136,47 +132,37 @@
     </div>
   </div>
 
-  <!-- Elemen Media Native -->
   <audio id="audio-player" preload="auto"></audio>
   <video id="video-player" preload="auto" playsinline muted loop style="display: none;"></video>
 
   <script>
     // =========================================================================
-    // ⚙️ PENGATURAN LEWAT KODE
-    // Pastikan bazzi.mp3 & video_tengah.mov ada di folder yang sama
+    // ⚙️ PENGATURAN FILE MEDIA
     // =========================================================================
     const DEFAULT_AUDIO = 'bazzi.mp3';
-    const DEFAULT_VIDEO = 'video_tengah.mov';
+    const DEFAULT_VIDEO = 'video_tengah.mp4';
     // =========================================================================
 
-    // Sinkronisasi Lirik Bazzi - Beautiful
+    // Lirik & Timing disesuaikan persis dari tampilan video TikTok
     const LYRICS = [
-      { start: 0.0, end: 4.8, text: '...got you faded...' },
-      { start: 4.8, end: 7.2, text: "Sayin' you don't" },
-      { start: 7.2, end: 9.8, text: "want from me I need to flex it" },
-      { start: 9.8, end: 13.5, text: "Started when we were younger" },
-      { start: 13.5, end: 15.6, text: "Swore to God" },
-      { start: 15.6, end: 17.8, text: "that I loved her" },
-      { start: 17.8, end: 20.2, text: "Sorry that your mom found out" },
-      { start: 20.2, end: 22.8, text: "Guess that we just really had the thunder" },
-      { start: 22.8, end: 25.2, text: "Ain't nobody else that I'd be under" },
-      { start: 25.2, end: 27.5, text: "Beautiful, beautiful life right now" },
-      { start: 27.5, end: 29.8, text: "Beautiful, beautiful night right now" },
-      { start: 29.8, end: 31.8, text: "No, no, no... HEY!" },
-      // 00:31.8 CHORUS DROP
-      { start: 31.8, end: 33.2, text: "Beautiful," },
-      { start: 33.2, end: 34.5, text: "Beautiful," },
-      { start: 34.5, end: 35.8, text: "Beautiful," },
-      { start: 35.8, end: 37.6, text: "Beautiful Angel" },
-      { start: 37.6, end: 39.5, text: "Love your" },
-      { start: 39.5, end: 41.5, text: "imperfections," },
-      { start: 41.5, end: 43.5, text: "every angle" },
-      { start: 43.5, end: 46.2, text: "Tomorrow comes and goes" },
-      { start: 46.2, end: 48.2, text: "before you know" },
-      { start: 48.2, end: 50.0, text: "So I just had to let you know" }
+      { start: 1.8, end: 4.8, text: "...got you faded..." },
+      { start: 4.8, end: 10.2, text: "saying you're the one for me,\nI need to face it" },
+      { start: 10.2, end: 13.5, text: "started when\nwe were younger" },
+      { start: 13.5, end: 15.6, text: "swear to god\nthat I loved her" },
+      { start: 15.6, end: 18.0, text: "sorry that your mom\nfound out" },
+      { start: 18.0, end: 20.6, text: "guess that we just\nreally had the thunder" },
+      { start: 20.6, end: 22.8, text: "ain't nobody else\nthat I'd be under" },
+      { start: 22.8, end: 25.0, text: "beautiful, beautiful\nlife right now" },
+      { start: 25.0, end: 27.2, text: "beautiful, beautiful\nnight right now" },
+      { start: 27.2, end: 30.5, text: "no, no, no" },
+      { start: 30.5, end: 32.2, text: "hey.." },
+      // 00:32.2 CHORUS DROP
+      { start: 32.2, end: 37.0, text: "beautiful, beautiful,\nbeautiful, beautiful angel" },
+      { start: 37.0, end: 41.2, text: "love your imperfections\nevery angle" },
+      { start: 41.2, end: 46.0, text: "tomorrow comes and goes\nbefore you know" },
+      { start: 46.0, end: 49.5, text: "so i just had\nto let you know.." }
     ];
 
-    // Bitmap Pixel Heart 8-Bit
     const HEART_7x6 = [
       [0, 1, 1, 0, 1, 1, 0],
       [1, 1, 1, 1, 1, 1, 1],
@@ -197,7 +183,6 @@
       [0, 0, 0, 0, 1, 0, 0, 0, 0]
     ];
 
-    // Partikel Hati Melayang
     const hearts = [];
     const heartColors = ['#ff3388', '#ff70a6', '#00e5ff', '#ffffff', '#ff99c8'];
     for (let i = 0; i < 35; i++) {
@@ -223,27 +208,24 @@
     let isPlaying = false;
     let playhead = 0;
     let startTime = 0;
-    let duration = 50.0;
+    let duration = 49.0;
     let hasAudioLoaded = false;
     let hasVideoLoaded = false;
 
-    // Audio setup
     audioEl.volume = 1.0;
     audioEl.muted = false;
     audioEl.src = DEFAULT_AUDIO;
     audioEl.onloadedmetadata = () => {
-      duration = audioEl.duration || 50.0;
+      duration = audioEl.duration || 49.0;
       hasAudioLoaded = true;
     };
     audioEl.oncanplay = () => { hasAudioLoaded = true; };
 
-    // Video setup + bypass CORS
     videoEl.crossOrigin = 'anonymous';
     videoEl.src = DEFAULT_VIDEO;
     videoEl.onloadeddata = () => { hasVideoLoaded = true; };
     videoEl.oncanplay = () => { hasVideoLoaded = true; };
 
-    // Offscreen Canvas
     const videoOffscreen = document.createElement('canvas');
     videoOffscreen.width = 160;
     videoOffscreen.height = 100;
@@ -262,7 +244,7 @@
       }
 
       if (hasVideoLoaded) {
-        const videoT = Math.max(0, playhead - 31.8);
+        const videoT = Math.max(0, playhead - 32.2);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
         videoEl.play().catch(() => {});
       }
@@ -285,7 +267,7 @@
       startTime = performance.now() - playhead * 1000;
       if (hasAudioLoaded) audioEl.currentTime = playhead;
       if (hasVideoLoaded) {
-        const videoT = Math.max(0, playhead - 31.8);
+        const videoT = Math.max(0, playhead - 32.2);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
       }
     }
@@ -297,28 +279,27 @@
       seek(pos * duration);
     });
 
-    // Helper: Menggambar teks agar otomatis muat tanpa kepotong
-    function drawResponsiveText(text, x, y, maxWidth) {
-      let fontSize = 38;
+    function drawMultilineText(text, x, y) {
+      const fontSize = 34;
+      const lineHeight = 46;
       ctx.font = `bold ${fontSize}px "Silkscreen", monospace`;
-      
-      // Perkecil ukuran font bertahap jika teks melebihi lebar layar aman
-      while (ctx.measureText(text).width > maxWidth && fontSize > 18) {
-        fontSize -= 2;
-        ctx.font = `bold ${fontSize}px "Silkscreen", monospace`;
-      }
 
-      // Shadow hitam tebal di balik huruf
-      ctx.fillStyle = '#000000';
-      for (let dx = -4; dx <= 4; dx += 2) {
-        for (let dy = -4; dy <= 4; dy += 2) {
-          ctx.fillText(text, x + dx, y + dy);
+      const lines = text.split('\n');
+      const startY = y - ((lines.length - 1) * lineHeight) / 2;
+
+      lines.forEach((line, index) => {
+        const lineY = startY + index * lineHeight;
+
+        ctx.fillStyle = '#000000';
+        for (let dx = -4; dx <= 4; dx += 2) {
+          for (let dy = -4; dy <= 4; dy += 2) {
+            ctx.fillText(line, x + dx, lineY + dy);
+          }
         }
-      }
 
-      // Warna teks putih
-      ctx.fillStyle = '#f8f8f8';
-      ctx.fillText(text, x, y);
+        ctx.fillStyle = '#f8f8f8';
+        ctx.fillText(line, x, lineY);
+      });
     }
 
     function render() {
@@ -338,27 +319,24 @@
         }
       }
 
-      // Timeline update
       const p = (playhead / duration) * 100;
       timelineFill.style.width = `${p}%`;
 
       const w = canvas.width;
       const h = canvas.height;
 
-      // 1. OLED Black
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, w, h);
 
-      const isDropActive = playhead >= 31.8;
+      const isDropActive = playhead >= 32.2;
 
-      // 2. VIDEO DI TENGAH LAYAR
+      // Video Dot Matrix
       if (isDropActive) {
         vCtx.fillStyle = '#000000';
         vCtx.fillRect(0, 0, 160, 100);
 
         let rendered = false;
 
-        // Coba gambar video asli
         if (hasVideoLoaded && videoEl.readyState >= 2) {
           try {
             vCtx.drawImage(videoEl, 0, 0, 160, 100);
@@ -368,7 +346,6 @@
           }
         }
 
-        // Fallback siluet jika video gagal di-decode browser
         if (!rendered) {
           const t = playhead;
           const headBob = Math.sin(t * 2.2) * 2;
@@ -407,7 +384,6 @@
           vCtx.restore();
         }
 
-        // Sampling pixel ke dot matrix
         try {
           const imgData = vCtx.getImageData(0, 0, 160, 100).data;
           const gridCols = 88;
@@ -440,12 +416,10 @@
             }
           }
           ctx.globalAlpha = 1.0;
-        } catch (corsErr) {
-          // Tangani jika terjadi CORS issue
-        }
+        } catch (corsErr) {}
       }
 
-      // 3. EFEK LOVE
+      // Hati Melayang
       const heartCount = isDropActive ? hearts.length : Math.floor(hearts.length * 0.4);
 
       for (let i = 0; i < heartCount; i++) {
@@ -486,8 +460,8 @@
         ctx.restore();
       }
 
-      // Hati Besar Berdenyut Saat Chorus
-      if (isDropActive && playhead >= 35.8 && playhead < 43.5) {
+      // Hati Berdenyut Drop
+      if (isDropActive && playhead >= 32.2 && playhead < 37.0) {
         const pulse = 1.0 + Math.sin(playhead * 6.5) * 0.18;
         const pSize = 4.5 * pulse;
         const map = HEART_9x8;
@@ -507,21 +481,20 @@
         ctx.restore();
       }
 
-      // 4. LIRIK LAGU RESPONSIF (TIDAK AKAN KEPOTONG)
+      // Lirik Tengah Layar
       const activeLine = LYRICS.find(l => playhead >= l.start && playhead < l.end);
 
       if (activeLine) {
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        const textY = isDropActive ? h * 0.53 : h * 0.42;
+        const textY = isDropActive ? h * 0.53 : h * 0.44;
         
-        // Lebar batas aman teks adalah 88% lebar canvas
-        drawResponsiveText(activeLine.text, w / 2, textY, w * 0.88);
+        drawMultilineText(activeLine.text, w / 2, textY);
         ctx.restore();
       }
 
-      // 5. Scanline CRT
+      // Scanline CRT
       ctx.fillStyle = 'rgba(0, 0, 0, 0.20)';
       for (let y = 0; y < h; y += 4) {
         ctx.fillRect(0, y, w, 1.5);
