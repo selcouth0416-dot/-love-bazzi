@@ -2,358 +2,283 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bazzi - Beautiful Player</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>Retro Pixel Lyric Player - Bazzi</title>
+  <!-- Font Pixel Retro -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+      background: #000;
     }
     body {
-      background: #050507;
-      color: #fff;
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       overflow: hidden;
-      position: relative;
-    }
-
-    /* Video / Foto Background */
-    #bgVideo {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: cover;
-      filter: brightness(0.35) contrast(1.1);
-      z-index: 1;
-    }
-
-    /* Teks Lirik Latar Raksasa (Kinetic Background Lyrics) */
-    .bg-lyrics-container {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .bg-lyrics {
-      font-size: 8vw;
-      font-weight: 800;
-      color: rgba(255, 255, 255, 0.28);
-      filter: blur(5px);
-      text-align: center;
-      max-width: 90%;
-      line-height: 1.1;
-      transform: scale(0.95);
-      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
-    }
-
-    /* Widget Glassmorphism iOS */
-    .player-card {
-      position: relative;
-      z-index: 3;
-      width: 360px;
-      padding: 24px;
-      border-radius: 34px;
-      background: rgba(24, 24, 28, 0.72);
-      backdrop-filter: blur(35px) saturate(180%);
-      -webkit-backdrop-filter: blur(35px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.65);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.55);
-      font-weight: 600;
-    }
-
-    /* Area Teks Lirik Utama */
-    .lyrics-box {
-      min-height: 90px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .active-lyric {
-      font-size: 20px;
-      font-weight: 700;
-      line-height: 1.35;
-      color: #ffffff;
-      transition: all 0.3s ease;
-    }
-
-    /* Info Lagu & Cover */
-    .track-info-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-top: 4px;
-    }
-    .album-cover {
-      width: 52px;
-      height: 52px;
-      border-radius: 12px;
-      background: #111;
-      overflow: hidden;
-      flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .album-cover img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .track-meta {
-      flex-grow: 1;
-    }
-    .track-device {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.5);
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    .track-title {
-      font-size: 16px;
-      font-weight: 700;
+      font-family: 'VT323', monospace;
       color: #fff;
     }
-    .track-artist {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    /* Progress Scrubber */
-    .progress-section {
+    #player-container {
+      position: relative;
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .progress-bar-bg {
-      width: 100%;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 999px;
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .progress-bar-fill {
-      width: 0%;
-      height: 100%;
-      background: #ffffff;
-      border-radius: 999px;
-    }
-    .time-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.45);
-      font-weight: 600;
-    }
-
-    /* Tombol Kontrol iOS */
-    .controls-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 4px 6px;
-    }
-    .icon-btn {
-      background: none;
-      border: none;
-      color: #ffffff;
-      cursor: pointer;
-      opacity: 0.9;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      transition: transform 0.15s ease, opacity 0.15s ease;
+      align-items: center;
+      background: #000;
+      box-shadow: 0 0 35px rgba(255, 255, 255, 0.08);
     }
-    .icon-btn:hover {
-      opacity: 1;
-      transform: scale(1.1);
+    canvas {
+      display: block;
+      image-rendering: pixelated;
     }
-    .icon-btn.play-btn {
-      transform: scale(1.3);
+    .controls {
+      margin-top: 18px;
     }
-    .icon-btn.play-btn:hover {
-      transform: scale(1.4);
+    .controls button {
+      background: #111;
+      border: 1px solid #444;
+      color: #fff;
+      padding: 8px 24px;
+      cursor: pointer;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      border-radius: 4px;
+      transition: 0.2s;
     }
-    svg {
-      fill: currentColor;
+    .controls button:hover {
+      background: #fff;
+      color: #000;
     }
   </style>
 </head>
 <body>
 
-  <!-- Background Video / Foto -->
-  <video id="bgVideo" src="video.mov" loop muted playsinline></video>
-
-  <!-- Lirik Raksasa Blur di Latar Belakang -->
-  <div class="bg-lyrics-container">
-    <div id="bgLyricText" class="bg-lyrics"></div>
+  <div id="player-container">
+    <canvas id="screen" width="900" height="650"></canvas>
   </div>
 
-  <!-- Widget Glassmorphism iOS -->
-  <div class="player-card">
-    <div class="card-header">
-      <span>Lyrics:</span>
-      <span>Finnlyrics</span>
-    </div>
-
-    <div class="lyrics-box">
-      <div id="lyricText" class="active-lyric">...</div>
-    </div>
-
-    <div class="track-info-row">
-      <div class="album-cover">
-        <!-- Ikon Bintang Emas Bazzi / Cover Album -->
-        <svg viewBox="0 0 100 100" width="100%" height="100%">
-          <rect width="100" height="100" fill="#000"/>
-          <polygon points="50,15 61,38 86,40 67,57 73,82 50,69 27,82 33,57 14,40 39,38" fill="#e6ca65"/>
-        </svg>
-      </div>
-      <div class="track-meta">
-        <div class="track-device">iPhone</div>
-        <div class="track-title">Beautiful</div>
-        <div class="track-artist">Bazzi</div>
-      </div>
-    </div>
-
-    <div class="progress-section">
-      <div class="progress-bar-bg" id="progressContainer">
-        <div class="progress-bar-fill" id="progressFill"></div>
-      </div>
-      <div class="time-labels">
-        <span id="currentTime">0:00</span>
-        <span id="remainingTime">-0:00</span>
-      </div>
-    </div>
-
-    <div class="controls-row">
-      <!-- Star / Favorite -->
-      <button class="icon-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
-      </button>
-      <!-- Prev -->
-      <button class="icon-btn" id="btnPrev">
-        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-      </button>
-      <!-- Play / Pause -->
-      <button class="icon-btn play-btn" id="btnPlay">
-        <svg id="playIcon" width="22" height="22" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-      <!-- Next -->
-      <button class="icon-btn" id="btnNext">
-        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-      </button>
-      <!-- AirPlay -->
-      <button class="icon-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 22h12l-6-6zM21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v-2H3V5h18v12h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-      </button>
-    </div>
+  <div class="controls">
+    <button id="btnPlay">▶ PLAY / PAUSE</button>
   </div>
 
+  <!-- Ganti nama file audio dan video lokal kamu di sini -->
   <audio id="bgAudio" src="bazzi.mp3" preload="auto"></audio>
+  <video id="bgVideo" src="video.mov" loop muted playsinline style="display:none;"></video>
 
   <script>
+    const canvas = document.getElementById('screen');
+    const ctx = canvas.getContext('2d');
     const audio = document.getElementById('bgAudio');
     const video = document.getElementById('bgVideo');
     const btnPlay = document.getElementById('btnPlay');
-    const playIcon = document.getElementById('playIcon');
-    const lyricText = document.getElementById('lyricText');
-    const bgLyricText = document.getElementById('bgLyricText');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressFill = document.getElementById('progressFill');
-    const currentTimeEl = document.getElementById('currentTime');
-    const remainingTimeEl = document.getElementById('remainingTime');
 
-    // Timeline lirik yang disinkronkan dengan video
+    const offCanvas = document.createElement('canvas');
+    const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+
+    let audioCtx, analyser, dataArray;
+    let isAudioReady = false;
+
+    // --- TIMELINE LIRIK BAZZI (BEAUTIFUL) ---
+    // Sesuaikan titik detik 'start' dan 'end' dengan file audio bazzi.mp3 kamu
     const lyrics = [
-      { start: 0.0, end: 4.5, text: "" },
-      { start: 4.5, end: 10.0, text: "saying you're the one for me, i need to face it" },
-      { start: 32.0, end: 36.5, text: "beautiful, beautiful, beautiful, beautiful angel" },
-      { start: 37.0, end: 41.0, text: "love your imperfections every angle" },
-      { start: 41.0, end: 46.0, text: "tomorrow comes and goes before you know" }
+      { start: 0.0, end: 2.2, text: "Beautiful\nBazzi", isIntro: true },
+      
+      // Verse 1
+      { start: 2.8, end: 3.5, text: "Now" },
+      { start: 3.5, end: 4.5, text: "Our" },
+      { start: 4.5, end: 5.4, text: "Background" },
+      { start: 5.4, end: 6.2, text: "Didn't" },
+      { start: 6.2, end: 7.0, text: "Meaning" },
+      { start: 7.0, end: 8.0, text: "Got" },
+      { start: 8.0, end: 9.0, text: "You" },
+      { start: 9.0, end: 10.2, text: "Faded" },
+      { start: 10.2, end: 11.5, text: "Saying" },
+      { start: 11.5, end: 12.3, text: "You're" },
+      { start: 12.3, end: 13.0, text: "The" },
+      { start: 13.0, end: 14.0, text: "One" },
+      { start: 14.0, end: 15.0, text: "For" },
+      { start: 15.0, end: 15.8, text: "Me" },
+      { start: 15.8, end: 16.8, text: "I Need" },
+      { start: 16.8, end: 18.0, text: "To Face It" },
+      
+      { start: 18.0, end: 19.2, text: "Started" },
+      { start: 19.2, end: 20.0, text: "When" },
+      { start: 20.0, end: 20.8, text: "We" },
+      { start: 20.8, end: 21.6, text: "Were" },
+      { start: 21.6, end: 23.0, text: "Younger" },
+      
+      // Bagian Chorus (Mulai memunculkan video dot-matrix di latar belakang)
+      { start: 30.5, end: 32.0, text: "Beautiful", showBg: true },
+      { start: 32.0, end: 33.2, text: "Beautiful", showBg: true },
+      { start: 33.2, end: 34.5, text: "Beautiful", showBg: true },
+      { start: 34.5, end: 36.5, text: "Angel", showBg: true },
+      { start: 36.5, end: 38.0, text: "Love Your", showBg: true },
+      { start: 38.0, end: 39.5, text: "Imperfections", showBg: true },
+      { start: 39.5, end: 41.5, text: "Every Angle", showBg: true },
+      { start: 41.5, end: 43.5, text: "Tomorrow", showBg: true },
+      { start: 43.5, end: 45.0, text: "Comes And Goes", showBg: true },
+      { start: 45.0, end: 47.0, text: "Before You Know", showBg: true },
+      { start: 47.0, end: 50.0, text: "So I Just Had To Let You Know", showBg: true }
     ];
 
-    function formatTime(seconds) {
-      if (isNaN(seconds)) return "0:00";
-      const m = Math.floor(seconds / 60);
-      const s = Math.floor(seconds % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    function initAudio() {
+      if (isAudioReady) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaElementSource(audio);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 64;
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
+      dataArray = new Uint8Array(analyser.frequencyBinCount);
+      isAudioReady = true;
     }
 
-    function togglePlay() {
+    btnPlay.addEventListener('click', () => {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       if (audio.paused) {
         audio.play();
         video.play();
-        playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+        btnPlay.innerText = "⏸ PAUSE";
       } else {
         audio.pause();
         video.pause();
-        playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+        btnPlay.innerText = "▶ PLAY";
       }
-    }
-
-    btnPlay.addEventListener('click', togglePlay);
-
-    // Sinkronisasi Lirik & Progress Bar
-    audio.addEventListener('timeupdate', () => {
-      const cur = audio.currentTime;
-      const dur = audio.duration || 0;
-
-      // Update Bar & Waktu
-      progressFill.style.width = `${(cur / dur) * 100}%`;
-      currentTimeEl.innerText = formatTime(cur);
-      remainingTimeEl.innerText = `-${formatTime(dur - cur)}`;
-
-      // Cari lirik aktif sesuai timestamp detik
-      const matched = lyrics.find(l => cur >= l.start && cur <= l.end);
-      const currentString = matched ? matched.text : "";
-
-      if (lyricText.innerText !== currentString) {
-        lyricText.style.opacity = 0;
-        bgLyricText.style.opacity = 0;
-        setTimeout(() => {
-          lyricText.innerText = currentString;
-          bgLyricText.innerText = currentString;
-          lyricText.style.opacity = 1;
-          bgLyricText.style.opacity = 0.3;
-        }, 150);
-      }
-    });
-
-    // Seek / lompat durasi lagu saat progress bar diklik
-    progressContainer.addEventListener('click', (e) => {
-      const rect = progressContainer.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      audio.currentTime = pos * audio.duration;
-      video.currentTime = audio.currentTime;
     });
 
     audio.addEventListener('seeked', () => {
       video.currentTime = audio.currentTime;
     });
+
+    // Render Grid Titik LED Matrix dari Frame Video
+    function drawVideoBackground() {
+      const cols = 90;
+      const rows = 65;
+      offCanvas.width = cols;
+      offCanvas.height = rows;
+
+      offCtx.drawImage(video, 0, 0, cols, rows);
+      const imgData = offCtx.getImageData(0, 0, cols, rows).data;
+
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const idx = (y * cols + x) * 4;
+          const r = imgData[idx];
+          const g = imgData[idx + 1];
+          const b = imgData[idx + 2];
+          const brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
+
+          if (brightness > 0.08) {
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            const h = Math.max(1, cellH * brightness * 0.9);
+            ctx.fillRect(
+              x * cellW + 1,
+              y * cellH + (cellH - h) / 2,
+              cellW - 1.5,
+              h
+            );
+          }
+        }
+      }
+    }
+
+    // Visualizer Bar Spektrum Audio Retro di Tengah Layar
+    function drawVisualizer(currentTime) {
+      let values = [];
+      if (analyser && !audio.paused) {
+        analyser.getByteFrequencyData(dataArray);
+        values = Array.from(dataArray.slice(2, 28));
+      } else {
+        for (let i = 0; i < 26; i++) {
+          const val = Math.sin(currentTime * 5 + i * 0.3) * 30 + 35;
+          values.push(Math.max(5, val));
+        }
+      }
+
+      const barCount = values.length;
+      const barWidth = 8;
+      const barGap = 4;
+      const totalWidth = barCount * (barWidth + barGap);
+      const startX = (canvas.width - totalWidth) / 2;
+      const baseY = canvas.height / 2 + 80;
+
+      ctx.fillStyle = '#ffffff';
+      values.forEach((v, i) => {
+        const height = (v / 255) * 45;
+        const x = startX + i * (barWidth + barGap);
+        ctx.fillRect(x, baseY - height, barWidth, height * 2);
+      });
+
+      // Garis player retro + kontrol navigasi piksel
+      ctx.fillRect(startX - 40, baseY, 30, 2);
+      ctx.fillRect(startX + totalWidth + 10, baseY, 30, 2);
+      ctx.font = "14px 'VT323', monospace";
+      ctx.fillText("⏮ ⏸ ⏭", canvas.width / 2 - 20, baseY + 25);
+    }
+
+    // Render Teks Lirik Pixel
+    function drawLyricText(text, isIntro) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 14;
+
+      if (isIntro) {
+        ctx.font = "46px 'Press Start 2P', monospace";
+        ctx.fillStyle = '#f0f0f0';
+        const lines = text.split('\n');
+        lines.forEach((l, idx) => {
+          const y = canvas.height / 2 - 20 + idx * 60;
+          ctx.strokeText(l, canvas.width / 2, y);
+          ctx.fillText(l, canvas.width / 2, y);
+        });
+      } else {
+        ctx.font = "72px 'VT323', monospace";
+        ctx.fillStyle = '#ffffff';
+        const y = canvas.height / 2 - 35;
+        ctx.strokeText(text, canvas.width / 2, y);
+        ctx.fillText(text, canvas.width / 2, y);
+      }
+      ctx.restore();
+    }
+
+    // Render Loop Utama
+    function render() {
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const currentTime = audio.currentTime || 0;
+      const currentLyric = lyrics.find(l => currentTime >= l.start && currentTime <= l.end);
+
+      // Munculkan video pixel matrix saat properti showBg bernilai true
+      if (currentLyric && currentLyric.showBg && video.readyState >= 2) {
+        drawVideoBackground();
+      }
+
+      // Tampilkan bar visualizer audio
+      if (!currentLyric || !currentLyric.isIntro) {
+        drawVisualizer(currentTime);
+      }
+
+      // Tampilkan kata lirik aktif
+      if (currentLyric) {
+        drawLyricText(currentLyric.text, currentLyric.isIntro);
+      }
+
+      requestAnimationFrame(render);
+    }
+
+    requestAnimationFrame(render);
   </script>
 </body>
 </html>
