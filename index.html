@@ -2,153 +2,272 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Retro Pixel Lyric Player - Bazzi</title>
-  <!-- Font Pixel Retro -->
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      background: #000;
+      background-color: #000000;
     }
     body {
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       overflow: hidden;
       font-family: 'VT323', monospace;
-      color: #fff;
+      color: #ffffff;
     }
-    #player-container {
+    #screen-wrapper {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #000;
-      box-shadow: 0 0 35px rgba(255, 255, 255, 0.08);
+      width: 100vw;
+      max-width: 960px;
+      height: 600px;
+      background: #000000;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95);
     }
     canvas {
       display: block;
+      width: 100%;
+      height: 100%;
       image-rendering: pixelated;
     }
-    .controls {
+    .panel-controls {
       margin-top: 18px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      z-index: 10;
     }
-    .controls button {
-      background: #111;
-      border: 1px solid #444;
-      color: #fff;
-      padding: 8px 24px;
-      cursor: pointer;
+    .retro-btn {
+      background: #111111;
+      border: 1px solid #333333;
+      color: #eeeeee;
+      padding: 10px 24px;
       font-family: 'Press Start 2P', monospace;
       font-size: 11px;
+      cursor: pointer;
       border-radius: 4px;
-      transition: 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
-    .controls button:hover {
-      background: #fff;
-      color: #000;
+    .retro-btn:hover {
+      background: #ffffff;
+      color: #000000;
     }
   </style>
 </head>
 <body>
 
-  <div id="player-container">
-    <canvas id="screen" width="900" height="650"></canvas>
+  <div id="screen-wrapper">
+    <canvas id="displayCanvas" width="960" height="600"></canvas>
   </div>
 
-  <div class="controls">
-    <button id="btnPlay">▶ PLAY / PAUSE</button>
+  <div class="panel-controls">
+    <button id="playToggleBtn" class="retro-btn">▶ PLAY</button>
   </div>
 
-  <!-- Ganti nama file audio dan video lokal kamu di sini -->
-  <audio id="bgAudio" src="bazzi.mp3" preload="auto"></audio>
-  <video id="bgVideo" src="video.mov" loop muted playsinline style="display:none;"></video>
+  <!-- Berkas lokal: audio bazzi.mp3 dan video latar video.mov -->
+  <audio id="audioSource" src="bazzi.mp3" preload="auto"></audio>
+  <video id="videoSource" src="video.mov" loop muted playsinline style="display:none;"></video>
 
   <script>
-    const canvas = document.getElementById('screen');
+    const canvas = document.getElementById('displayCanvas');
     const ctx = canvas.getContext('2d');
-    const audio = document.getElementById('bgAudio');
-    const video = document.getElementById('bgVideo');
-    const btnPlay = document.getElementById('btnPlay');
+    const audio = document.getElementById('audioSource');
+    const video = document.getElementById('videoSource');
+    const playToggleBtn = document.getElementById('playToggleBtn');
 
-    const offCanvas = document.createElement('canvas');
-    const offCtx = offCanvas.getContext('2d', { willReadFrequently: true });
+    // Canvas buffer untuk sampling frame video menjadi matriks karakter
+    const sampleCanvas = document.createElement('canvas');
+    const sampleCtx = sampleCanvas.getContext('2d', { willReadFrequently: true });
 
-    let audioCtx, analyser, dataArray;
-    let isAudioReady = false;
+    let audioContext = null;
+    let analyser = null;
+    let freqData = null;
+    let isAudioEngineStarted = false;
 
-    // --- TIMELINE LIRIK BAZZI (BEAUTIFUL) ---
-    // Sesuaikan titik detik 'start' dan 'end' dengan file audio bazzi.mp3 kamu
-    const lyrics = [
-      { start: 0.0, end: 2.2, text: "Beautiful\nBazzi", isIntro: true },
-      
-      // Verse 1
-      { start: 2.8, end: 3.5, text: "Now" },
-      { start: 3.5, end: 4.5, text: "Our" },
-      { start: 4.5, end: 5.4, text: "Background" },
-      { start: 5.4, end: 6.2, text: "Didn't" },
-      { start: 6.2, end: 7.0, text: "Meaning" },
-      { start: 7.0, end: 8.0, text: "Got" },
-      { start: 8.0, end: 9.0, text: "You" },
-      { start: 9.0, end: 10.2, text: "Faded" },
-      { start: 10.2, end: 11.5, text: "Saying" },
-      { start: 11.5, end: 12.3, text: "You're" },
-      { start: 12.3, end: 13.0, text: "The" },
-      { start: 13.0, end: 14.0, text: "One" },
-      { start: 14.0, end: 15.0, text: "For" },
-      { start: 15.0, end: 15.8, text: "Me" },
-      { start: 15.8, end: 16.8, text: "I Need" },
-      { start: 16.8, end: 18.0, text: "To Face It" },
-      
-      { start: 18.0, end: 19.2, text: "Started" },
-      { start: 19.2, end: 20.0, text: "When" },
-      { start: 20.0, end: 20.8, text: "We" },
-      { start: 20.8, end: 21.6, text: "Were" },
-      { start: 21.6, end: 23.0, text: "Younger" },
-      
-      // Bagian Chorus (Mulai memunculkan video dot-matrix di latar belakang)
-      { start: 30.5, end: 32.0, text: "Beautiful", showBg: true },
-      { start: 32.0, end: 33.2, text: "Beautiful", showBg: true },
-      { start: 33.2, end: 34.5, text: "Beautiful", showBg: true },
-      { start: 34.5, end: 36.5, text: "Angel", showBg: true },
-      { start: 36.5, end: 38.0, text: "Love Your", showBg: true },
-      { start: 38.0, end: 39.5, text: "Imperfections", showBg: true },
-      { start: 39.5, end: 41.5, text: "Every Angle", showBg: true },
-      { start: 41.5, end: 43.5, text: "Tomorrow", showBg: true },
-      { start: 43.5, end: 45.0, text: "Comes And Goes", showBg: true },
-      { start: 45.0, end: 47.0, text: "Before You Know", showBg: true },
-      { start: 47.0, end: 50.0, text: "So I Just Had To Let You Know", showBg: true }
+    // Karakter ASCII untuk kepadatan piksel
+    const ASCII_CHARS = " .:-=+*#%@";
+
+    // Timeline lirik sinkron dengan vokal chorus Bazzi - Beautiful
+    const lyricTimeline = [
+      { start: 0.0,  end: 3.5,  text: "Beautiful\nBazzi", isIntro: true, showBg: false },
+      { start: 30.5, end: 32.5, text: "Hey..", isIntro: false, showBg: false },
+      { start: 32.5, end: 37.0, text: "Beautiful, beautiful,\nbeautiful angel", isIntro: false, showBg: true },
+      { start: 37.0, end: 41.0, text: "Love your imperfections\nevery angle", isIntro: false, showBg: true },
+      { start: 41.0, end: 46.0, text: "Tomorrow comes and goes\nbefore you know", isIntro: false, showBg: true },
+      { start: 46.0, end: 51.0, text: "So I just had\nto let you know", isIntro: false, showBg: true }
     ];
 
-    function initAudio() {
-      if (isAudioReady) return;
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createMediaElementSource(audio);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 64;
-      source.connect(analyser);
-      analyser.connect(audioCtx.destination);
-      dataArray = new Uint8Array(analyser.frequencyBinCount);
-      isAudioReady = true;
+    function setupAudioNodes() {
+      if (isAudioEngineStarted) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioCtx();
+        const src = audioContext.createMediaElementSource(audio);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 64;
+        src.connect(analyser);
+        analyser.connect(audioContext.destination);
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        isAudioEngineStarted = true;
+      } catch (err) {
+        analyser = null;
+      }
     }
 
-    btnPlay.addEventListener('click', () => {
-      initAudio();
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
+    function renderAsciiVideoBackground() {
+      const cols = 96;
+      const rows = 48;
+      sampleCanvas.width = cols;
+      sampleCanvas.height = rows;
+
+      sampleCtx.drawImage(video, 0, 0, cols, rows);
+      const frameData = sampleCtx.getImageData(0, 0, cols, rows).data;
+
+      ctx.save();
+      ctx.font = "12px 'Space Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const charWidth = canvas.width / cols;
+      const charHeight = canvas.height / rows;
+
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const i = (y * cols + x) * 4;
+          const r = frameData[i];
+          const g = frameData[i + 1];
+          const b = frameData[i + 2];
+          const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+          if (brightness > 0.08) {
+            const charIdx = Math.floor(brightness * (ASCII_CHARS.length - 1));
+            const char = ASCII_CHARS[charIdx];
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+            ctx.fillText(char, x * charWidth + charWidth / 2, y * charHeight + charHeight / 2);
+          }
+        }
       }
+      ctx.restore();
+    }
+
+    function drawRetroWaveform(time) {
+      let spectrum = [];
+      if (analyser && !audio.paused) {
+        analyser.getByteFrequencyData(freqData);
+        spectrum = Array.from(freqData.slice(2, 28));
+      } else {
+        for (let idx = 0; idx < 26; idx++) {
+          const val = Math.sin(time * 6 + idx * 0.45) * 35 + 40;
+          spectrum.push(Math.max(6, val));
+        }
+      }
+
+      const barWidth = 7;
+      const barSpacing = 4;
+      const count = spectrum.length;
+      const totalWidth = count * (barWidth + barSpacing);
+      const startX = (canvas.width - totalWidth) / 2;
+      const centerY = canvas.height / 2 + 75;
+
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+
+      // Render batang bar audio visualizer simetris
+      spectrum.forEach((magnitude, idx) => {
+        const height = (magnitude / 255) * 44;
+        const xPos = startX + idx * (barWidth + barSpacing);
+        ctx.fillRect(xPos, centerY - height, barWidth, height * 2);
+      });
+
+      // Garis horizontal dan simbol kontrol navigasi piksel
+      ctx.fillRect(startX - 50, centerY, 36, 2);
+      ctx.fillRect(startX + totalWidth + 14, centerY, 36, 2);
+      ctx.font = "16px 'VT323', monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("⏮   ❙❙   ⏭", canvas.width / 2, centerY + 28);
+      ctx.restore();
+    }
+
+    function drawLyricTypography(text, isIntro) {
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      const lines = text.split("\n");
+
+      if (isIntro) {
+        ctx.font = "40px 'Press Start 2P', monospace";
+        ctx.fillStyle = "#f5f5f5";
+        lines.forEach((line, index) => {
+          const y = canvas.height / 2 - 25 + index * 55;
+          ctx.fillText(line, canvas.width / 2, y);
+        });
+      } else {
+        ctx.font = "64px 'VT323', monospace";
+        ctx.lineWidth = 14;
+        ctx.strokeStyle = "#000000";
+        ctx.fillStyle = "#ffffff";
+
+        const startY = canvas.height / 2 - 35 - ((lines.length - 1) * 30);
+        lines.forEach((line, index) => {
+          const y = startY + index * 60;
+          ctx.strokeText(line, canvas.width / 2, y);
+          ctx.fillText(line, canvas.width / 2, y);
+        });
+      }
+      ctx.restore();
+    }
+
+    function animationLoop() {
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const currentTime = audio.currentTime || 0;
+      const activeCue = lyricTimeline.find(cue => currentTime >= cue.start && currentTime <= cue.end);
+
+      // Gambar latar video matriks ASCII saat cue mengaktifkan showBg
+      if (activeCue && activeCue.showBg && video.readyState >= 2) {
+        renderAsciiVideoBackground();
+      }
+
+      // Visualizer bar ditampilkan di luar layar intro
+      if (!activeCue || !activeCue.isIntro) {
+        drawRetroWaveform(currentTime);
+      }
+
+      // Tampilkan teks lirik aktif
+      if (activeCue) {
+        drawLyricTypography(activeCue.text, activeCue.isIntro);
+      }
+
+      requestAnimationFrame(animationLoop);
+    }
+
+    playToggleBtn.addEventListener('click', () => {
+      setupAudioNodes();
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+
       if (audio.paused) {
         audio.play();
         video.play();
-        btnPlay.innerText = "⏸ PAUSE";
+        playToggleBtn.innerText = "⏸ PAUSE";
       } else {
         audio.pause();
         video.pause();
-        btnPlay.innerText = "▶ PLAY";
+        playToggleBtn.innerText = "▶ PLAY";
       }
     });
 
@@ -156,129 +275,7 @@
       video.currentTime = audio.currentTime;
     });
 
-    // Render Grid Titik LED Matrix dari Frame Video
-    function drawVideoBackground() {
-      const cols = 90;
-      const rows = 65;
-      offCanvas.width = cols;
-      offCanvas.height = rows;
-
-      offCtx.drawImage(video, 0, 0, cols, rows);
-      const imgData = offCtx.getImageData(0, 0, cols, rows).data;
-
-      const cellW = canvas.width / cols;
-      const cellH = canvas.height / rows;
-
-      for (let y = 0; y < rows; y++) {
-        for (let x = 0; x < cols; x++) {
-          const idx = (y * cols + x) * 4;
-          const r = imgData[idx];
-          const g = imgData[idx + 1];
-          const b = imgData[idx + 2];
-          const brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
-
-          if (brightness > 0.08) {
-            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-            const h = Math.max(1, cellH * brightness * 0.9);
-            ctx.fillRect(
-              x * cellW + 1,
-              y * cellH + (cellH - h) / 2,
-              cellW - 1.5,
-              h
-            );
-          }
-        }
-      }
-    }
-
-    // Visualizer Bar Spektrum Audio Retro di Tengah Layar
-    function drawVisualizer(currentTime) {
-      let values = [];
-      if (analyser && !audio.paused) {
-        analyser.getByteFrequencyData(dataArray);
-        values = Array.from(dataArray.slice(2, 28));
-      } else {
-        for (let i = 0; i < 26; i++) {
-          const val = Math.sin(currentTime * 5 + i * 0.3) * 30 + 35;
-          values.push(Math.max(5, val));
-        }
-      }
-
-      const barCount = values.length;
-      const barWidth = 8;
-      const barGap = 4;
-      const totalWidth = barCount * (barWidth + barGap);
-      const startX = (canvas.width - totalWidth) / 2;
-      const baseY = canvas.height / 2 + 80;
-
-      ctx.fillStyle = '#ffffff';
-      values.forEach((v, i) => {
-        const height = (v / 255) * 45;
-        const x = startX + i * (barWidth + barGap);
-        ctx.fillRect(x, baseY - height, barWidth, height * 2);
-      });
-
-      // Garis player retro + kontrol navigasi piksel
-      ctx.fillRect(startX - 40, baseY, 30, 2);
-      ctx.fillRect(startX + totalWidth + 10, baseY, 30, 2);
-      ctx.font = "14px 'VT323', monospace";
-      ctx.fillText("⏮ ⏸ ⏭", canvas.width / 2 - 20, baseY + 25);
-    }
-
-    // Render Teks Lirik Pixel
-    function drawLyricText(text, isIntro) {
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 14;
-
-      if (isIntro) {
-        ctx.font = "46px 'Press Start 2P', monospace";
-        ctx.fillStyle = '#f0f0f0';
-        const lines = text.split('\n');
-        lines.forEach((l, idx) => {
-          const y = canvas.height / 2 - 20 + idx * 60;
-          ctx.strokeText(l, canvas.width / 2, y);
-          ctx.fillText(l, canvas.width / 2, y);
-        });
-      } else {
-        ctx.font = "72px 'VT323', monospace";
-        ctx.fillStyle = '#ffffff';
-        const y = canvas.height / 2 - 35;
-        ctx.strokeText(text, canvas.width / 2, y);
-        ctx.fillText(text, canvas.width / 2, y);
-      }
-      ctx.restore();
-    }
-
-    // Render Loop Utama
-    function render() {
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      const currentTime = audio.currentTime || 0;
-      const currentLyric = lyrics.find(l => currentTime >= l.start && currentTime <= l.end);
-
-      // Munculkan video pixel matrix saat properti showBg bernilai true
-      if (currentLyric && currentLyric.showBg && video.readyState >= 2) {
-        drawVideoBackground();
-      }
-
-      // Tampilkan bar visualizer audio
-      if (!currentLyric || !currentLyric.isIntro) {
-        drawVisualizer(currentTime);
-      }
-
-      // Tampilkan kata lirik aktif
-      if (currentLyric) {
-        drawLyricText(currentLyric.text, currentLyric.isIntro);
-      }
-
-      requestAnimationFrame(render);
-    }
-
-    requestAnimationFrame(render);
+    requestAnimationFrame(animationLoop);
   </script>
 </body>
 </html>
