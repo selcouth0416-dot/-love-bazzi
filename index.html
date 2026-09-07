@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bazzi - Beautiful (Retro Pixel Music Video)</title>
-  <meta name="description" content="Retro CRT Dot-Matrix Lyric Player with Floating Pixel Hearts and Synced Audio" />
+  <title>Bazzi - Beautiful</title>
+  <meta name="description" content="Retro Pixel Lyric Video with Floating Hearts" />
 
-  <!-- Google Fonts: Silkscreen (Pixel Typography) -->
+  <!-- Google Fonts: Silkscreen Pixel Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
@@ -27,88 +27,69 @@
       color: #ffffff;
       font-family: 'Silkscreen', monospace;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
     }
 
-    /* Terminal Bezel Frame */
-    .laptop-frame {
-      width: 95%;
-      max-width: 820px;
-      background: #050505;
-      border: 1px solid #1a1a1a;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.95);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    /* Landscape Lebar Tanpa Kotak / Bezel */
+    .viewport-container {
+      width: 96vw;
+      max-width: 1120px;
+      aspect-ratio: 18 / 9;
+      max-height: 82vh;
       position: relative;
-    }
-
-    .top-header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #141414;
-      font-size: 11px;
-    }
-
-    .badge-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #aaaaaa;
-    }
-
-    .dot-pulse {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #00ffaa;
-      box-shadow: 0 0 8px #00ffaa;
-    }
-
-    .love-badge {
-      color: #ff3388;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* Screen Canvas */
-    .screen-wrapper {
-      width: 100%;
-      aspect-ratio: 16 / 10;
-      background: #000000;
-      border: 1px solid #141414;
-      border-radius: 6px;
-      margin: 12px 0;
-      position: relative;
-      overflow: hidden;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     canvas {
       width: 100%;
       height: 100%;
       display: block;
+      object-fit: contain;
     }
 
-    /* Controls */
-    .controls-wrapper {
-      width: 100%;
-      max-width: 560px;
+    /* Overlay Tombol Play Saat Terhenti */
+    .play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .play-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: rgba(255, 255, 255, 0.85);
+      padding-left: 4px;
+    }
+
+    /* Timeline Ramping & Minimalis */
+    .bottom-bar {
+      width: 92vw;
+      max-width: 780px;
+      margin-top: 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
     }
 
-    .timeline-container {
+    .timeline-track {
       width: 100%;
       height: 12px;
       display: flex;
@@ -116,163 +97,147 @@
       cursor: pointer;
     }
 
-    .timeline-bg {
+    .timeline-line {
       width: 100%;
-      height: 3px;
-      background: #222222;
+      height: 2px;
+      background: #181818;
       border-radius: 2px;
       position: relative;
+      overflow: hidden;
+      transition: height 0.15s;
+    }
+
+    .timeline-track:hover .timeline-line {
+      height: 4px;
     }
 
     .timeline-fill {
       height: 100%;
-      background: linear-gradient(90deg, #00d4ff, #ff3388);
       width: 0%;
-      transition: width 0.05s linear;
+      background: linear-gradient(90deg, #00e5ff, #ff3388);
     }
 
-    .row-buttons {
-      width: 100%;
+    .ghost-actions {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-    }
-
-    .time-label {
+      gap: 16px;
       font-size: 11px;
-      color: #666666;
+      color: #555555;
     }
 
-    .center-group {
+    .ghost-btn {
+      background: none;
+      border: none;
+      color: inherit;
+      font-family: inherit;
+      font-size: 11px;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 4px;
+      transition: color 0.15s;
     }
 
-    .btn-ctrl {
-      background: #0f0f0f;
-      border: 1px solid #2a2a2a;
-      color: #ffffff;
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 12px;
-      transition: all 0.15s;
-    }
-
-    .btn-ctrl:hover {
-      border-color: #ff3388;
+    .ghost-btn:hover {
       color: #ff3388;
-      box-shadow: 0 0 8px rgba(255, 51, 136, 0.3);
     }
 
-    .btn-ctrl.play {
-      padding: 8px 20px;
+    /* Drag & Drop Feedback */
+    .drop-hint {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      border: 2px dashed #ff3388;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #ff3388;
       font-size: 14px;
-      border-color: #444444;
-    }
-
-    .sub-hint {
-      font-size: 10px;
-      color: #444444;
-      text-align: center;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-  <div class="laptop-frame">
-    <!-- Header -->
-    <div class="top-header">
-      <div class="badge-status">
-        <div class="dot-pulse"></div>
-        <span>CRT DOT-MATRIX • BAZZI - BEAUTIFUL</span>
-      </div>
-      <div class="love-badge">
-        ♥ PIXEL LOVE ACTIVE
-      </div>
+  <!-- Area Layar Landscape Lebar (Klik Layar untuk Play/Pause) -->
+  <div class="viewport-container" id="screen">
+    <canvas id="crt-canvas" width="960" height="500"></canvas>
+
+    <div class="play-overlay" id="play-overlay">
+      <div class="play-circle">▶</div>
     </div>
 
-    <!-- Screen Canvas -->
-    <div class="screen-wrapper" id="canvas-container">
-      <canvas id="crt-canvas" width="800" height="500"></canvas>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls-wrapper">
-      <div class="timeline-container" id="timeline">
-        <div class="timeline-bg">
-          <div class="timeline-fill" id="timeline-fill"></div>
-        </div>
-      </div>
-
-      <div class="row-buttons">
-        <div class="time-label" id="time-display">0:00 / 0:50</div>
-
-        <div class="center-group">
-          <button class="btn-ctrl" id="btn-prev" title="Kembali ke awal">|◄</button>
-          <button class="btn-ctrl play" id="btn-play">▶ PLAY</button>
-          <button class="btn-ctrl" id="btn-drop" title="Langsung ke Drop (00:31)">DROP ►|</button>
-        </div>
-
-        <div class="time-label">00:31 DROP</div>
-      </div>
-
-      <div class="sub-hint">Klik layar atau tombol Play • Tekan tombol DROP untuk langsung ke bagian video</div>
+    <div class="drop-hint" id="drop-hint">
+      Lepaskan file MP3 atau Video di sini
     </div>
   </div>
 
-  <!-- Media Elements -->
-  <audio id="audio-el" preload="auto"></audio>
-  <video id="video-el" preload="auto" playsinline muted loop style="display: none;"></video>
+  <!-- Timeline Minimalis Tanpa Kotak -->
+  <div class="bottom-bar">
+    <div class="timeline-track" id="timeline">
+      <div class="timeline-line">
+        <div class="timeline-fill" id="timeline-fill"></div>
+      </div>
+    </div>
+
+    <div class="ghost-actions">
+      <!-- Input File Tersembunyi (Bisa upload langsung atau drag & drop) -->
+      <label class="ghost-btn" title="Pilih Lagu MP3">
+        🎵 <span id="lbl-audio">Pilih MP3</span>
+        <input type="file" id="input-audio" accept="audio/*" style="display: none;" />
+      </label>
+
+      <label class="ghost-btn" title="Ganti Video Tengah">
+        🎬 <span id="lbl-video">Ganti Video</span>
+        <input type="file" id="input-video" accept="video/*" style="display: none;" />
+      </label>
+
+      <span style="color: #ff3388;">♥</span>
+    </div>
+  </div>
+
+  <!-- Elemen Audio & Video Native (Direct Hardware Output) -->
+  <audio id="audio-player" preload="auto"></audio>
+  <video id="video-player" preload="auto" playsinline muted loop style="display: none;"></video>
 
   <script>
     // =========================================================================
-    // ⚙️ PENGATURAN MEDIA (GANTI LAGU & VIDEO DI SINI LEWAT KODE)
+    // ⚙️ PENGATURAN LEWAT KODE
+    // Masukkan file 'bazzi.mp3' & 'video.mp4' di folder yang sama di GitHub
     // =========================================================================
-    // 1. Masukkan nama file atau URL audio Anda (misal: 'bazzi.mp3' atau '/bazzi.mp3' atau URL online)
-    const AUDIO_SRC = 'bazzi.mp3';
-
-    // 2. Masukkan nama file atau URL video Anda (misal: 'video.mp4' atau '/video.mp4' atau URL online)
-    const VIDEO_SRC = 'video_tengah.mov';
-
-    // 3. Kapan video muncul: 'drop' (hanya saat chorus 00:31) atau 'always' (sepanjang lagu)
-    const VIDEO_MODE = 'drop';
-
-    // 4. Aktifkan efek love (partikel hati pixel melayang)
-    const ENABLE_LOVE_EFFECT = true;
+    const DEFAULT_AUDIO = 'bazzi.mp3';
+    const DEFAULT_VIDEO = 'video.mp4';
     // =========================================================================
 
     // Sinkronisasi Lirik Bazzi - Beautiful
     const LYRICS = [
-      { start: 0.0, end: 2.8, text: 'BEAUTIFUL', sub: 'BAZZI' },
-      { start: 2.8, end: 4.8, text: '...got you faded...', sub: '' },
-      { start: 4.8, end: 7.2, text: "Sayin' you don't", sub: '' },
-      { start: 7.2, end: 9.8, text: "want from me I need to flex it", sub: '' },
-      { start: 9.8, end: 13.5, text: "Started when we were younger", sub: '' },
-      { start: 13.5, end: 15.6, text: "Swore to God", sub: '' },
-      { start: 15.6, end: 17.8, text: "that I loved her", sub: '' },
-      { start: 17.8, end: 20.2, text: "Sorry that your mom found out", sub: '' },
-      { start: 20.2, end: 22.8, text: "Guess that we just really had the thunder", sub: '' },
-      { start: 22.8, end: 25.2, text: "Ain't nobody else that I'd be under", sub: '' },
-      { start: 25.2, end: 27.5, text: "Beautiful, beautiful life right now", sub: '' },
-      { start: 27.5, end: 29.8, text: "Beautiful, beautiful night right now", sub: '' },
-      { start: 29.8, end: 31.8, text: "No, no, no... HEY!", sub: '' },
-      // CHORUS DROP (00:31.8) - VIDEO DI TENGAH MUNCUL DENGAN EFEK LOVE
-      { start: 31.8, end: 33.2, text: "Beautiful,", sub: '' },
-      { start: 33.2, end: 34.5, text: "Beautiful,", sub: '' },
-      { start: 34.5, end: 35.8, text: "Beautiful,", sub: '' },
-      { start: 35.8, end: 37.6, text: "Beautiful Angel", sub: '' },
-      { start: 37.6, end: 39.5, text: "Love your", sub: '' },
-      { start: 39.5, end: 41.5, text: "imperfections,", sub: '' },
-      { start: 41.5, end: 43.5, text: "every angle", sub: '' },
-      { start: 43.5, end: 46.2, text: "Tomorrow comes and goes", sub: '' },
-      { start: 46.2, end: 48.2, text: "before you know", sub: '' },
-      { start: 48.2, end: 50.0, text: "So I just had to let you know", sub: '' }
+      { start: 0.0, end: 2.8, text: 'BEAUTIFUL' },
+      { start: 2.8, end: 4.8, text: '...got you faded...' },
+      { start: 4.8, end: 7.2, text: "Sayin' you don't" },
+      { start: 7.2, end: 9.8, text: "want from me I need to flex it" },
+      { start: 9.8, end: 13.5, text: "Started when we were younger" },
+      { start: 13.5, end: 15.6, text: "Swore to God" },
+      { start: 15.6, end: 17.8, text: "that I loved her" },
+      { start: 17.8, end: 20.2, text: "Sorry that your mom found out" },
+      { start: 20.2, end: 22.8, text: "Guess that we just really had the thunder" },
+      { start: 22.8, end: 25.2, text: "Ain't nobody else that I'd be under" },
+      { start: 25.2, end: 27.5, text: "Beautiful, beautiful life right now" },
+      { start: 27.5, end: 29.8, text: "Beautiful, beautiful night right now" },
+      { start: 29.8, end: 31.8, text: "No, no, no... HEY!" },
+      // 00:31.8 CHORUS DROP - VIDEO DI TENGAH + EFEK LOVE
+      { start: 31.8, end: 33.2, text: "Beautiful," },
+      { start: 33.2, end: 34.5, text: "Beautiful," },
+      { start: 34.5, end: 35.8, text: "Beautiful," },
+      { start: 35.8, end: 37.6, text: "Beautiful Angel" },
+      { start: 37.6, end: 39.5, text: "Love your" },
+      { start: 39.5, end: 41.5, text: "imperfections," },
+      { start: 41.5, end: 43.5, text: "every angle" },
+      { start: 43.5, end: 46.2, text: "Tomorrow comes and goes" },
+      { start: 46.2, end: 48.2, text: "before you know" },
+      { start: 48.2, end: 50.0, text: "So I just had to let you know" }
     ];
 
-    // Bitmap 8-Bit Pixel Heart (7x6 dan 9x8)
+    // Bitmap Pixel Heart 8-Bit
     const HEART_7x6 = [
       [0, 1, 1, 0, 1, 1, 0],
       [1, 1, 1, 1, 1, 1, 1],
@@ -293,218 +258,248 @@
       [0, 0, 0, 0, 1, 0, 0, 0, 0]
     ];
 
-    // Inisialisasi Partikel Hati Melayang
+    // Partikel Hati Melayang
     const hearts = [];
     const heartColors = ['#ff3388', '#ff70a6', '#00e5ff', '#ffffff', '#ff99c8'];
-    for (let i = 0; i < 28; i++) {
+    for (let i = 0; i < 35; i++) {
       hearts.push({
-        x: Math.random() * 800,
+        x: Math.random() * 960,
         y: Math.random() * 500,
-        vy: 0.5 + Math.random() * 0.9,
-        size: Math.random() > 0.6 ? 3 : 2,
+        vy: 0.6 + Math.random() * 1.1,
+        size: Math.random() > 0.6 ? 3.5 : 2.2,
         color: heartColors[Math.floor(Math.random() * heartColors.length)],
         seed: Math.random() * 100,
-        alpha: 0.2 + Math.random() * 0.6,
-        isBig: Math.random() > 0.75
+        alpha: 0.3 + Math.random() * 0.6,
+        isBig: Math.random() > 0.7
       });
     }
 
-    // DOM & Media Elements
+    // DOM References
     const canvas = document.getElementById('crt-canvas');
     const ctx = canvas.getContext('2d');
-    const audioEl = document.getElementById('audio-el');
-    const videoEl = document.getElementById('video-el');
-    const btnPlay = document.getElementById('btn-play');
-    const timeDisplay = document.getElementById('time-display');
+    const audioEl = document.getElementById('audio-player');
+    const videoEl = document.getElementById('video-player');
+    const playOverlay = document.getElementById('play-overlay');
     const timelineFill = document.getElementById('timeline-fill');
+    const dropHint = document.getElementById('drop-hint');
 
     let isPlaying = false;
     let playhead = 0;
     let startTime = 0;
     let duration = 50.0;
-    let isAudioFileLoaded = false;
+    let hasCustomAudio = false;
+    let hasCustomVideo = false;
 
-    // Web Audio Analyser
-    let audioCtx = null;
-    let analyser = null;
-    let sourceNode = null;
-    let synthInterval = null;
-    const freqBuffer = new Uint8Array(64);
+    // Direct Native Audio Setup
+    audioEl.volume = 1.0;
+    audioEl.muted = false;
+    audioEl.src = DEFAULT_AUDIO;
+    audioEl.oncanplay = () => { hasCustomAudio = true; };
+    videoEl.src = DEFAULT_VIDEO;
+    videoEl.oncanplay = () => { hasCustomVideo = true; };
 
-    // Setup Media dari Konfigurasi Kode
-    audioEl.src = AUDIO_SRC;
-    audioEl.oncanplay = () => { isAudioFileLoaded = true; };
-    audioEl.onerror = () => { isAudioFileLoaded = false; };
-
-    videoEl.src = VIDEO_SRC;
-
-    // Offscreen Canvas untuk Rasterisasi Video ke CRT Dot Matrix
+    // Offscreen Canvas untuk Rasterisasi Video ke CRT Scanlines
     const videoOffscreen = document.createElement('canvas');
     videoOffscreen.width = 160;
     videoOffscreen.height = 100;
     const vCtx = videoOffscreen.getContext('2d', { willReadFrequently: true });
 
-    function initAudioContext() {
-      if (!audioCtx) {
-        const AC = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AC();
-        analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 128;
+    // Audio Loader (Direct Blob, 100% Suara Berbunyi)
+    function loadAudioFile(file) {
+      const url = URL.createObjectURL(file);
+      audioEl.src = url;
+      audioEl.volume = 1.0;
+      audioEl.muted = false;
+      audioEl.load();
+      hasCustomAudio = true;
+      document.getElementById('lbl-audio').innerText = file.name.slice(0, 12) + '...';
+      seek(0);
+      playAudio();
+    }
+
+    function loadVideoFile(file) {
+      const url = URL.createObjectURL(file);
+      videoEl.src = url;
+      videoEl.load();
+      hasCustomVideo = true;
+      document.getElementById('lbl-video').innerText = file.name.slice(0, 12) + '...';
+      if (isPlaying) videoEl.play().catch(() => {});
+    }
+
+    function playAudio() {
+      isPlaying = true;
+      playOverlay.style.opacity = '0';
+      startTime = performance.now() - playhead * 1000;
+
+      if (hasCustomAudio) {
+        audioEl.currentTime = playhead;
+        audioEl.volume = 1.0;
+        audioEl.muted = false;
+        audioEl.play().catch((err) => {
+          console.warn('Playback notice:', err);
+        });
       }
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      if (hasCustomVideo) {
+        const videoT = Math.max(0, playhead - 31.8);
+        videoEl.currentTime = videoT % (videoEl.duration || 60);
+        videoEl.play().catch(() => {});
+      }
+    }
+
+    function pauseAudio() {
+      isPlaying = false;
+      playOverlay.style.opacity = '1';
+      audioEl.pause();
+      videoEl.pause();
     }
 
     function togglePlay() {
-      initAudioContext();
-      isPlaying = !isPlaying;
-
-      if (isPlaying) {
-        btnPlay.innerText = '▌▌ PAUSE';
-        startTime = performance.now() - playhead * 1000;
-
-        if (isAudioFileLoaded) {
-          if (!sourceNode) {
-            try {
-              sourceNode = audioCtx.createMediaElementSource(audioEl);
-              sourceNode.connect(analyser);
-              analyser.connect(audioCtx.destination);
-            } catch(e) {}
-          }
-          audioEl.currentTime = playhead;
-          audioEl.play().catch(() => {});
-        }
-
-        if (videoEl.readyState >= 1) {
-          const videoT = VIDEO_MODE === 'drop' ? Math.max(0, playhead - 31.8) : playhead;
-          videoEl.currentTime = videoT % (videoEl.duration || 60);
-          videoEl.play().catch(() => {});
-        }
-      } else {
-        btnPlay.innerText = '▶ PLAY';
-        audioEl.pause();
-        videoEl.pause();
-      }
+      if (isPlaying) pauseAudio();
+      else playAudio();
     }
 
     function seek(sec) {
       playhead = Math.max(0, Math.min(duration, sec));
       startTime = performance.now() - playhead * 1000;
-      if (isAudioFileLoaded) audioEl.currentTime = playhead;
-      if (videoEl.readyState >= 1) {
-        const videoT = VIDEO_MODE === 'drop' ? Math.max(0, playhead - 31.8) : playhead;
+      if (hasCustomAudio) audioEl.currentTime = playhead;
+      if (hasCustomVideo) {
+        const videoT = Math.max(0, playhead - 31.8);
         videoEl.currentTime = videoT % (videoEl.duration || 60);
       }
     }
 
-    document.getElementById('canvas-container').addEventListener('click', togglePlay);
-    btnPlay.addEventListener('click', togglePlay);
-    document.getElementById('btn-prev').addEventListener('click', () => seek(0));
-    document.getElementById('btn-drop').addEventListener('click', () => seek(31.8));
-
+    // Event Listeners
+    document.getElementById('screen').addEventListener('click', togglePlay);
     document.getElementById('timeline').addEventListener('click', (e) => {
       const rect = e.currentTarget.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
       seek(pos * duration);
     });
 
-    // Render Loop Canvas
+    document.getElementById('input-audio').addEventListener('change', (e) => {
+      if (e.target.files[0]) loadAudioFile(e.target.files[0]);
+    });
+
+    document.getElementById('input-video').addEventListener('change', (e) => {
+      if (e.target.files[0]) loadVideoFile(e.target.files[0]);
+    });
+
+    // Drag & Drop File Langsung ke Layar
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropHint.style.display = 'flex';
+    });
+
+    window.addEventListener('dragleave', (e) => {
+      if (e.clientX <= 0 || e.clientY <= 0) dropHint.style.display = 'none';
+    });
+
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropHint.style.display = 'none';
+      const files = Array.from(e.dataTransfer.files);
+      for (const f of files) {
+        if (f.type.startsWith('audio/') || f.name.endsWith('.mp3')) loadAudioFile(f);
+        else if (f.type.startsWith('video/') || f.name.endsWith('.mp4')) loadVideoFile(f);
+      }
+    });
+
+    // Render Loop (Hanya Lirik, Love, dan Video)
     function render() {
       requestAnimationFrame(render);
 
       if (isPlaying) {
-        if (isAudioFileLoaded && !audioEl.paused) {
+        if (hasCustomAudio && !audioEl.paused) {
           playhead = audioEl.currentTime;
           if (audioEl.duration) duration = audioEl.duration;
-          if (audioEl.ended) togglePlay();
+          if (audioEl.ended) pauseAudio();
         } else {
           playhead = (performance.now() - startTime) / 1000;
           if (playhead >= duration) {
             playhead = 0;
-            togglePlay();
+            pauseAudio();
           }
         }
       }
 
-      // Update UI Progress
+      // Update Timeline Fill
       const p = (playhead / duration) * 100;
       timelineFill.style.width = `${p}%`;
-      const curM = Math.floor(playhead / 60);
-      const curS = Math.floor(playhead % 60).toString().padStart(2, '0');
-      const durM = Math.floor(duration / 60);
-      const durS = Math.floor(duration % 60).toString().padStart(2, '0');
-      timeDisplay.innerText = `${curM}:${curS} / ${durM}:${durS}`;
-
-      // Ambil audio frequency
-      if (analyser && isPlaying && isAudioFileLoaded) {
-        analyser.getByteFrequencyData(freqBuffer);
-      } else {
-        for (let i = 0; i < freqBuffer.length; i++) {
-          freqBuffer[i] = isPlaying ? Math.floor(Math.sin(playhead * 7 + i * 0.35) * 35 + 50) : 8;
-        }
-      }
 
       const w = canvas.width;
       const h = canvas.height;
 
-      // 1. Background Hitam OLED
+      // 1. OLED Black (Latar Hitam Murni Tanpa Kotak)
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, w, h);
 
-      // Cek apakah video di tengah aktif
+      // Cek Chorus Drop (Detik 00:31.8)
       const isDropActive = playhead >= 31.8;
-      const isVideoVisible = VIDEO_MODE === 'always' ? (playhead >= 2.8) : isDropActive;
 
-      // 2. Render Video di Tengah Layar (Rasterisasi Dot Matrix)
-      if (isVideoVisible) {
+      // 2. VIDEO DI TENGAH LAYAR (Aktif Saat Drop 00:31.8)
+      if (isDropActive) {
         vCtx.fillStyle = '#000000';
         vCtx.fillRect(0, 0, 160, 100);
 
-        let hasRendered = false;
+        let rendered = false;
 
-        // Render file video yang ditentukan di kode jika ready
-        if (videoEl.readyState >= 2) {
+        // Jika user memasukkan video
+        if (hasCustomVideo && videoEl.readyState >= 2) {
           try {
             vCtx.drawImage(videoEl, 0, 0, 160, 100);
-            hasRendered = true;
+            rendered = true;
           } catch(e) {}
         }
 
-        // Generator video dinamis jika file video belum dimasukkan
-        if (!hasRendered) {
+        // Generator video dinamis jika belum upload video
+        if (!rendered) {
           const t = playhead;
           const headBob = Math.sin(t * 2.2) * 2;
           const headTilt = Math.sin(t * 1.4) * 0.08;
           const blink = Math.sin(t * 1.8) > 0.94 ? 0.2 : 1.0;
+          const hairSway = Math.sin(t * 2.8) * 4;
 
           vCtx.save();
           vCtx.translate(80, 50 + headBob);
           vCtx.rotate(headTilt);
 
-          vCtx.fillStyle = '#111111';
-          vCtx.beginPath(); vCtx.ellipse(0, 2, 54, 46, 0, 0, Math.PI * 2); vCtx.fill();
+          vCtx.fillStyle = '#0a0a0a';
+          vCtx.beginPath();
+          vCtx.ellipse(0, 2, 54 + hairSway * 0.5, 46, 0, 0, Math.PI * 2);
+          vCtx.fill();
 
           const fGrad = vCtx.createRadialGradient(0, -2, 6, 0, -2, 38);
           fGrad.addColorStop(0, '#ffffff');
-          fGrad.addColorStop(0.5, '#b0b0b0');
-          fGrad.addColorStop(0.8, '#555555');
+          fGrad.addColorStop(0.45, '#c0c0c0');
+          fGrad.addColorStop(0.75, '#666666');
+          fGrad.addColorStop(0.95, '#181818');
           fGrad.addColorStop(1, '#000000');
           vCtx.fillStyle = fGrad;
-          vCtx.beginPath(); vCtx.ellipse(0, 0, 30, 38, 0, 0, Math.PI * 2); vCtx.fill();
+          vCtx.beginPath();
+          vCtx.ellipse(0, 0, 30, 38, 0, 0, Math.PI * 2);
+          vCtx.fill();
 
-          vCtx.fillStyle = '#111111';
+          // Rosy cheeks
+          vCtx.fillStyle = 'rgba(255, 120, 180, 0.5)';
+          vCtx.beginPath(); vCtx.ellipse(-14, 4, 8, 5, 0, 0, Math.PI * 2); vCtx.fill();
+          vCtx.beginPath(); vCtx.ellipse(14, 4, 8, 5, 0, 0, Math.PI * 2); vCtx.fill();
+
+          vCtx.fillStyle = '#101010';
           vCtx.beginPath(); vCtx.ellipse(-13, -6, 7, 4 * blink, 0, 0, Math.PI * 2); vCtx.fill();
           vCtx.beginPath(); vCtx.ellipse(13, -6, 7, 4 * blink, 0, 0, Math.PI * 2); vCtx.fill();
+
           vCtx.restore();
         }
 
-        // Sampling pixel video ke CRT Dot Matrix Scanlines
+        // Sampling pixel video menjadi dot-matrix scanlines
         const imgData = vCtx.getImageData(0, 0, 160, 100).data;
-        const gridCols = 80;
-        const gridRows = 46;
-        const targetW = w * 0.72;
-        const targetH = h * 0.72;
+        const gridCols = 88;
+        const gridRows = 48;
+        const targetW = w * 0.76;
+        const targetH = h * 0.75;
         const startX = (w - targetW) / 2;
-        const startY = h * 0.07;
+        const startY = h * 0.06;
         const cellW = targetW / gridCols;
         const cellH = targetH / gridRows;
 
@@ -515,15 +510,15 @@
           for (let gx = 0; gx < gridCols; gx++) {
             const sx = Math.floor((gx / gridCols) * 160);
             const idx = (sy * 160 + sx) * 4;
-            const b = (imgData[idx] * 0.299 + imgData[idx + 1] * 0.587 + imgData[idx + 2] * 0.114) / 255;
+            const brightness = (imgData[idx] * 0.299 + imgData[idx + 1] * 0.587 + imgData[idx + 2] * 0.114) / 255;
 
-            if (b > 0.09) {
-              const dashLen = Math.max(1, cellW * b * 0.96);
-              const dashH = cellH * 0.64;
+            if (brightness > 0.08) {
+              const dashLen = Math.max(1.2, cellW * brightness * 0.96);
+              const dashH = cellH * 0.65;
               const px = startX + gx * cellW + (cellW - dashLen) / 2;
               const py = startY + gy * cellH;
 
-              ctx.globalAlpha = Math.min(1.0, b * 1.25);
+              ctx.globalAlpha = Math.min(1.0, brightness * 1.3);
               ctx.fillRect(px, py, dashLen, dashH);
             }
           }
@@ -532,90 +527,91 @@
       }
 
       // 3. EFEK LOVE (8-Bit Floating Pixel Hearts)
-      if (ENABLE_LOVE_EFFECT) {
-        const count = isDropActive ? hearts.length : Math.floor(hearts.length * 0.45);
+      const heartCount = isDropActive ? hearts.length : Math.floor(hearts.length * 0.4);
 
-        for (let i = 0; i < count; i++) {
-          const hItem = hearts[i];
+      for (let i = 0; i < heartCount; i++) {
+        const hItem = hearts[i];
 
-          if (isPlaying) {
-            hItem.y -= hItem.vy * (isDropActive ? 1.4 : 0.85);
-            hItem.x += Math.sin(playhead * 1.5 + hItem.seed) * 0.6;
+        if (isPlaying) {
+          hItem.y -= hItem.vy * (isDropActive ? 1.5 : 0.8);
+          hItem.x += Math.sin(playhead * 1.6 + hItem.seed) * 0.7;
 
-            if (hItem.y < -30) {
-              hItem.y = h + 10;
-              hItem.x = Math.random() * w;
-              hItem.seed = Math.random() * 100;
-            }
+          if (hItem.y < -30) {
+            hItem.y = h + 10;
+            hItem.x = Math.random() * w;
+            hItem.seed = Math.random() * 100;
           }
-
-          const map = hItem.isBig ? HEART_9x8 : HEART_7x6;
-          const pSize = hItem.size;
-          const hW = map[0].length * pSize;
-          const hH = map.length * pSize;
-          const startX = hItem.x - hW / 2;
-          const startY = hItem.y - hH / 2;
-
-          ctx.save();
-          const baseAlpha = isDropActive ? hItem.alpha * 1.1 : hItem.alpha * 0.65;
-          ctx.globalAlpha = Math.min(1.0, baseAlpha);
-          ctx.fillStyle = isDropActive ? (Math.sin(playhead * 4 + hItem.seed) > 0 ? '#ff3388' : hItem.color) : hItem.color;
-
-          for (let r = 0; r < map.length; r++) {
-            for (let c = 0; c < map[r].length; c++) {
-              if (map[r][c] === 1) {
-                ctx.fillRect(startX + c * pSize, startY + r * pSize, pSize - 0.4, pSize - 0.4);
-              }
-            }
-          }
-          ctx.restore();
         }
 
-        // Hati Berdenyut di Belakang Lirik saat Chorus Drop
-        if (isDropActive && playhead >= 35.8 && playhead < 43.5) {
-          const pScale = 1.0 + Math.sin(playhead * 6) * 0.15;
-          const pSize = 4 * pScale;
-          const map = HEART_9x8;
-          const pStartX = w / 2 - (map[0].length * pSize) / 2;
-          const pStartY = h * 0.38 - (map.length * pSize) / 2;
+        const map = hItem.isBig ? HEART_9x8 : HEART_7x6;
+        const pSize = hItem.size;
+        const hW = map[0].length * pSize;
+        const hH = map.length * pSize;
+        const startX = hItem.x - hW / 2;
+        const startY = hItem.y - hH / 2;
 
-          ctx.save();
-          ctx.globalAlpha = 0.85;
-          ctx.fillStyle = '#ff2a7a';
-          for (let r = 0; r < map.length; r++) {
-            for (let c = 0; c < map[r].length; c++) {
-              if (map[r][c] === 1) {
-                ctx.fillRect(pStartX + c * pSize, pStartY + r * pSize, pSize - 0.5, pSize - 0.5);
-              }
+        ctx.save();
+        const baseAlpha = isDropActive ? hItem.alpha * 1.15 : hItem.alpha * 0.7;
+        ctx.globalAlpha = Math.min(1.0, baseAlpha);
+        ctx.fillStyle = isDropActive
+          ? (Math.sin(playhead * 5 + hItem.seed) > 0 ? '#ff3388' : hItem.color)
+          : hItem.color;
+
+        for (let r = 0; r < map.length; r++) {
+          for (let c = 0; c < map[r].length; c++) {
+            if (map[r][c] === 1) {
+              ctx.fillRect(startX + c * pSize, startY + r * pSize, pSize - 0.4, pSize - 0.4);
             }
           }
-          ctx.restore();
         }
+        ctx.restore();
       }
 
-      // 4. Lirik Lagu
+      // Hati Besar Berdenyut Saat "Beautiful Angel" di Chorus Drop
+      if (isDropActive && playhead >= 35.8 && playhead < 43.5) {
+        const pulse = 1.0 + Math.sin(playhead * 6.5) * 0.18;
+        const pSize = 4.5 * pulse;
+        const map = HEART_9x8;
+        const pStartX = w / 2 - (map[0].length * pSize) / 2;
+        const pStartY = h * 0.36 - (map.length * pSize) / 2;
+
+        ctx.save();
+        ctx.globalAlpha = 0.9;
+        ctx.fillStyle = '#ff2a7a';
+        for (let r = 0; r < map.length; r++) {
+          for (let c = 0; c < map[r].length; c++) {
+            if (map[r][c] === 1) {
+              ctx.fillRect(pStartX + c * pSize, pStartY + r * pSize, pSize - 0.5, pSize - 0.5);
+            }
+          }
+        }
+        ctx.restore();
+      }
+
+      // 4. LIRIK LAGU PIXEL (HANYA LIRIK & LOVE & VIDEO)
       const activeLine = LYRICS.find(l => playhead >= l.start && playhead < l.end);
 
       if (playhead < 2.8) {
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 44px "Silkscreen", monospace';
+        ctx.font = 'bold 46px "Silkscreen", monospace';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('BEAUTIFUL', w / 2, h * 0.38);
+        ctx.fillText('BEAUTIFUL', w / 2, h * 0.40);
 
         ctx.font = '22px "Silkscreen", monospace';
         ctx.fillStyle = '#888888';
-        ctx.fillText('BAZZI', w / 2, h * 0.48);
+        ctx.fillText('BAZZI', w / 2, h * 0.50);
         ctx.restore();
       } else if (activeLine) {
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 36px "Silkscreen", monospace';
+        ctx.font = 'bold 38px "Silkscreen", monospace';
 
-        const textY = isVideoVisible ? h * 0.52 : h * 0.40;
+        const textY = isDropActive ? h * 0.53 : h * 0.42;
 
+        // Shadow hitam tebal di belakang huruf agar terbaca sangat tajam
         ctx.fillStyle = '#000000';
         for (let dx = -4; dx <= 4; dx += 2) {
           for (let dy = -4; dy <= 4; dy += 2) {
@@ -628,41 +624,8 @@
         ctx.restore();
       }
 
-      // 5. Waveform Gelombang Audio (Bawah)
-      const waveCols = 38;
-      const waveWidth = w * 0.58;
-      const waveStartX = (w - waveWidth) / 2;
-      const waveCenterY = h * 0.74;
-      const colSpacing = waveWidth / waveCols;
-
-      for (let c = 0; c < waveCols; c++) {
-        const x = waveStartX + c * colSpacing;
-        const distFromMid = Math.abs(c - waveCols / 2) / (waveCols / 2);
-        const freqIdx = Math.floor((1 - distFromMid) * 24);
-        const rawAmp = (freqBuffer[freqIdx] || 0) / 255;
-        const amp = isPlaying ? Math.max(0.12, rawAmp * (1.0 - distFromMid * 0.35)) : 0.08;
-
-        const barH = amp * 36;
-        const numDots = Math.max(1, Math.floor(barH / 5));
-
-        ctx.fillStyle = isDropActive ? '#ff80bf' : '#e2e2e2';
-        for (let d = -numDots; d <= numDots; d++) {
-          ctx.fillRect(x, waveCenterY + d * 5, 3, 3);
-        }
-      }
-
-      // 6. Scrubber Timeline
-      const scrubY = waveCenterY + 36;
-      ctx.fillStyle = '#333333';
-      ctx.fillRect(waveStartX, scrubY, waveWidth, 2);
-
-      const prog = Math.min(1.0, playhead / duration);
-      ctx.fillStyle = isDropActive ? '#ff4081' : '#00e5ff';
-      ctx.fillRect(waveStartX, scrubY, waveWidth * prog, 2);
-      ctx.fillRect(waveStartX + waveWidth * prog - 3, scrubY - 3, 6, 8);
-
-      // 7. CRT Scanline Overlay
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      // 5. Scanline CRT
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.20)';
       for (let y = 0; y < h; y += 4) {
         ctx.fillRect(0, y, w, 1.5);
       }
